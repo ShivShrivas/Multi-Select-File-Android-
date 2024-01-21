@@ -2,6 +2,8 @@ package com.app.multipartjava;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,10 +35,10 @@ public class MainActivity extends AppCompatActivity {
         Button pickFile,uploadFiles;
     private static final int PICK_FILES_REQUEST_CODE = 123;
 
-    private ListView listView;
+    private RecyclerView listView;
     private ArrayList<String> selectedFilesList;
     public ArrayList<File> fileArrayList;
-    private ArrayAdapter<String> adapter;
+    private ImageViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         selectedFilesList = new ArrayList<>();
         fileArrayList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selectedFilesList);
+        listView.setLayoutManager(new GridLayoutManager(this,4));
+        adapter = new ImageViewAdapter(MainActivity.this,fileArrayList);
         listView.setAdapter(adapter);
 
         pickFile.setOnClickListener(new View.OnClickListener() {
@@ -92,11 +96,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 Log.d("TAG", "onResponse: "+response.body());
+                Toast.makeText(MainActivity.this, response.body(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.d("TAG", "onFailure: "+t.getMessage());
+            Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -114,8 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < count; i++) {
                           File file=new File(getRealPathFromURI(data.getClipData().getItemAt(i).getUri()));
                         fileArrayList.add(file);
-                        String selectedFilePath = getRealPathFromURI(data.getClipData().getItemAt(i).getUri());
-                        selectedFilesList.add(selectedFilePath);
+
                     }
 
                     adapter.notifyDataSetChanged();
